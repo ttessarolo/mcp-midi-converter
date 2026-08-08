@@ -1,0 +1,36 @@
+{
+  "id": "akai-mpc-bfd-pop-113",
+  "name": "Akai MPC - BFD Pop Kit 113",
+  "description": "Measured from Acoustic-Kit-BFD Pop Kit 113.xpm saved by MPC 3.9.1.2.",
+  "source": "General MIDI Level 1 percussion",
+  "target": "Akai MPC Acoustic-Kit-BFD Pop Kit 113",
+  "gmRange": [35, 81],
+  "silentNote": 0,
+  "direct": {
+    "35": 36,
+    "36": 36,
+    "37": 42,
+    "38": 37,
+    "41": 44,
+    "42": 38,
+    "43": 44,
+    "44": 43,
+    "45": 45,
+    "46": 39,
+    "47": 45,
+    "48": 46,
+    "49": 50,
+    "50": 47,
+    "51": 48,
+    "53": 49,
+    "57": 51,
+    "59": 48
+  },
+  "fallback": {
+    "39": 41,
+    "40": 40,
+    "52": 51,
+    "55": 50,
+    "56": 49
+  }
+}
