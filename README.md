@@ -1,5 +1,7 @@
 # MPC MIDI Converter
 
+![MPC MIDI Converter main window](docs/assets/mpc-midi-converter.png)
+
 A native macOS app that converts General MIDI drum parts to the pad-note layout
 of a specific Akai MPC Drum Program. Your original MIDI file, MPC program,
 samples, and velocity layers are never changed.
