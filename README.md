@@ -6,8 +6,8 @@ A native macOS app that converts General MIDI drum parts to the pad-note layout
 of a specific Akai MPC Drum Program. Your original MIDI file, MPC program,
 samples, and velocity layers are never changed.
 
-[Download the latest macOS build](https://github.com/ttessarolo/mcp-midi-converter/releases/latest/download/MPC-MIDI-Converter-macOS-arm64.zip)
-· [View all releases](https://github.com/ttessarolo/mcp-midi-converter/releases)
+[Download the latest macOS build](https://github.com/ttessarolo/mpc-midi-converter/releases/latest/download/MPC-MIDI-Converter-macOS-arm64.zip)
+· [View all releases](https://github.com/ttessarolo/mpc-midi-converter/releases)
 
 The downloadable build requires macOS 13 or later and an Apple Silicon Mac.
 The source can also be compiled locally for the Mac architecture you are using.
@@ -69,8 +69,8 @@ Local compilation remains the canonical development and day-to-day workflow.
 It requires macOS 13 or later with Xcode and Swift installed:
 
 ```sh
-git clone https://github.com/ttessarolo/mcp-midi-converter.git
-cd mcp-midi-converter
+git clone https://github.com/ttessarolo/mpc-midi-converter.git
+cd mpc-midi-converter
 make
 open "dist/MPC MIDI Converter.app"
 ```

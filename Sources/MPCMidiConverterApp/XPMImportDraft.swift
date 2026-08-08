@@ -209,7 +209,7 @@ final class XPMImportDraft: ObservableObject, Identifiable {
 
         Add the MPC model, firmware version, and the result of loading a converted GM MIDI file before submitting.
         """
-        var components = URLComponents(string: "https://github.com/ttessarolo/mcp-midi-converter/issues/new")
+        var components = URLComponents(string: "https://github.com/ttessarolo/mpc-midi-converter/issues/new")
         components?.queryItems = [
             URLQueryItem(name: "template", value: "profile-submission.md"),
             URLQueryItem(name: "title", value: "[Profile] \(profile.name)"),
