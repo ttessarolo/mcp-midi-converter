@@ -8,25 +8,48 @@ struct ContentView: View {
     @State private var dropIsTargeted = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            header
-            dropZone
-            options
-            actionBar
-            results
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    header
+                    dropZone
+                    options
+                    actionBar
+                    results
+                        .id("conversion-results")
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
+                .padding(.bottom, 16)
+            }
+            .onChange(of: model.outcomes.count) { count in
+                guard count > 0 else { return }
+                withAnimation(.easeOut(duration: 0.2)) {
+                    proxy.scrollTo("conversion-results", anchor: .bottom)
+                }
+            }
         }
-        .padding(24)
+        .sheet(item: $model.xpmDraft) { draft in
+            XPMProfileReviewView(
+                draft: draft,
+                onCancel: model.dismissXPMDraft,
+                onInstall: { model.installGeneratedProfile(draft) },
+                onSubmit: { model.installAndPrepareProfileIssue(draft) }
+            )
+        }
     }
 
     private var header: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             Image(systemName: "arrow.left.arrow.right.circle.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(.blue)
-            VStack(alignment: .leading, spacing: 3) {
+                .font(.system(size: 34))
+                .foregroundStyle(.tint)
+            VStack(alignment: .leading, spacing: 1) {
                 Text("MPC MIDI Converter")
-                    .font(.title2.bold())
-                Text("General MIDI → mapping del kit Akai MPC")
+                    .font(.title3.bold())
+                Text("General MIDI → Akai MPC drum-kit mapping")
+                    .font(.callout)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -34,17 +57,17 @@ struct ContentView: View {
     }
 
     private var dropZone: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 7) {
             if model.files.isEmpty {
                 Image(systemName: "music.note.list")
-                    .font(.system(size: 34))
-                    .foregroundStyle(dropIsTargeted ? .blue : .secondary)
-                Text("Trascina qui uno o più file .mid/.midi")
+                    .font(.system(size: 28))
+                    .foregroundStyle(dropIsTargeted ? Color.accentColor : .secondary)
+                Text("Drop one or more .mid/.midi files here")
                     .font(.headline)
-                Text("Puoi anche trascinarli direttamente sull'icona dell'app nel Finder.")
+                Text("You can also drop files on the app icon in Finder or the Dock.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
-                Button("Scegli file…") {
+                Button("Choose Files…") {
                     model.chooseFiles()
                 }
             } else {
@@ -69,20 +92,20 @@ struct ContentView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .foregroundStyle(.secondary)
-                                .help("Rimuovi")
+                                .help("Remove")
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 5)
                         }
                     }
                 }
-                .frame(maxHeight: 130)
+                .frame(maxHeight: 110)
 
                 HStack {
-                    Button("Aggiungi…") { model.chooseFiles() }
-                    Button("Rimuovi tutti") { model.clearFiles() }
+                    Button("Add…") { model.chooseFiles() }
+                    Button("Remove All") { model.clearFiles() }
                     Spacer()
-                    Text("\(model.files.count) file")
+                    Text("\(model.files.count) file(s)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -94,17 +117,21 @@ struct ContentView: View {
                     .foregroundStyle(.orange)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 125)
-        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 105)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(dropIsTargeted ? Color.blue.opacity(0.10) : Color.secondary.opacity(0.07))
+            RoundedRectangle(cornerRadius: 12)
+                .fill(
+                    dropIsTargeted
+                        ? Color.accentColor.opacity(0.10)
+                        : Color(nsColor: .controlBackgroundColor).opacity(0.72)
+                )
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(
-                    dropIsTargeted ? Color.blue : Color.secondary.opacity(0.35),
-                    style: StrokeStyle(lineWidth: 2, dash: [7])
+                    dropIsTargeted ? Color.accentColor : Color.primary.opacity(0.16),
+                    lineWidth: dropIsTargeted ? 1.5 : 1
                 )
         )
         .onDrop(of: [UTType.fileURL.identifier], isTargeted: $dropIsTargeted) { providers in
@@ -113,70 +140,85 @@ struct ContentView: View {
     }
 
     private var options: some View {
-        GroupBox("Opzioni di traduzione") {
-            Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 12) {
-                GridRow {
-                    Text("Profilo di destinazione")
-                    HStack {
+        GroupBox("Conversion Options") {
+            VStack(alignment: .leading, spacing: 10) {
+                settingRow("Destination Profile") {
+                    HStack(spacing: 8) {
                         Picker("", selection: $model.selectedProfile) {
                             ForEach(model.profiles) { profile in
                                 Text(profile.name).tag(profile)
                             }
                         }
                         .labelsHidden()
-                        Button("Importa…") { model.importProfile() }
-                            .help("Importa un profilo di mapping JSON per un altro kit")
+                        .frame(width: 220)
+                        Button("Import…") { model.importProfile() }
+                            .help("Import a JSON mapping profile for another kit")
+                        Button {
+                            model.chooseXPMProgram()
+                        } label: {
+                            if model.isAnalyzingXPM {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else {
+                                Text("Create from XPM…")
+                            }
+                        }
+                        .disabled(model.isAnalyzingXPM)
+                        .help("Analyze an MPC Drum Program and review a new mapping profile")
                     }
                 }
-                GridRow {
-                    Text("Strumenti non disponibili")
+
+                settingRow("Unavailable Instruments") {
                     Picker("", selection: $model.unavailablePolicy) {
                         ForEach(UnavailableNotePolicy.allCases) { policy in
                             Text(policy.title).tag(policy)
                         }
                     }
                     .labelsHidden()
+                    .frame(width: 300)
                 }
-                GridRow {
-                    Text("Canali da convertire")
+
+                settingRow("Channels to Convert") {
                     Picker("", selection: $model.channelSelection) {
                         ForEach(MIDIChannelSelection.allCases) { channels in
                             Text(channels.title).tag(channels)
                         }
                     }
                     .labelsHidden()
+                    .frame(width: 300)
+                }
+
+                Text(model.unavailablePolicy.explanation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.leading, 174)
+
+                HStack(spacing: 24) {
+                    Toggle("Remap Polyphonic Key Pressure", isOn: $model.remapPolyphonicKeyPressure)
+                    Toggle("Overwrite Existing Outputs", isOn: $model.overwriteExisting)
+                }
+                .padding(.leading, 174)
+
+                Divider()
+
+                DisclosureGroup("Profile Details") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(model.selectedProfile.description)
+                        Text("\(model.selectedProfile.direct.count) primary mappings, \(model.selectedProfile.fallback.count) declared fallbacks, GM notes \(model.selectedProfile.gmRange.lowerBound)–\(model.selectedProfile.gmRange.upperBound).")
+                        Text("All unrelated MIDI data remains byte-for-byte identical.")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
                 }
             }
-            .padding(.top, 4)
-
-            Text(model.unavailablePolicy.explanation)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.top, 6)
-
-            HStack(spacing: 18) {
-                Toggle("Rimappa Polyphonic Key Pressure", isOn: $model.remapPolyphonicKeyPressure)
-                Toggle("Sovrascrivi output esistenti", isOn: $model.overwriteExisting)
-            }
-            .padding(.top, 8)
-
-            DisclosureGroup("Anteprima del profilo") {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(model.selectedProfile.description)
-                    Text("\(model.selectedProfile.direct.count) mapping primari, \(model.selectedProfile.fallback.count) fallback dichiarati, note GM \(model.selectedProfile.gmRange.lowerBound)–\(model.selectedProfile.gmRange.upperBound).")
-                    Text("I dati MIDI non interessati restano byte-per-byte identici.")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.top, 5)
-            }
-            .padding(.top, 8)
+            .padding(.top, 2)
         }
     }
 
     private var actionBar: some View {
         HStack {
-            Text("L'output viene scritto accanto all'originale con suffisso -mpc.")
+            Text("Output is written next to the original with an -mpc suffix.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer()
@@ -184,19 +226,20 @@ struct ContentView: View {
                 ProgressView()
                     .controlSize(.small)
             }
-            Button("Converti") {
+            Button("Convert") {
                 model.convert()
             }
             .buttonStyle(.borderedProminent)
             .keyboardShortcut(.return, modifiers: [.command])
             .disabled(model.files.isEmpty || model.isConverting)
         }
+        .padding(.horizontal, 1)
     }
 
     @ViewBuilder
     private var results: some View {
         if !model.outcomes.isEmpty {
-            GroupBox("Risultati") {
+            GroupBox("Results") {
                 VStack(spacing: 8) {
                     ForEach(model.outcomes) { outcome in
                         HStack(alignment: .top, spacing: 9) {
@@ -206,7 +249,7 @@ struct ContentView: View {
                                 Text(outcome.input.lastPathComponent)
                                     .fontWeight(.medium)
                                 if let report = outcome.report, let output = outcome.output {
-                                    Text("Creato \(output.lastPathComponent) · \(report.changedEvents) eventi modificati, \(report.fallbackEvents) fallback, \(report.silencedEvents) silenziati")
+                                    Text("Created \(output.lastPathComponent) · \(report.changedEvents) events changed, \(report.fallbackEvents) fallbacks, \(report.silencedEvents) silenced")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 } else if let message = outcome.errorMessage {
@@ -217,7 +260,7 @@ struct ContentView: View {
                             }
                             Spacer()
                             if let output = outcome.output {
-                                Button("Mostra") { model.reveal(output) }
+                                Button("Show in Finder") { model.reveal(output) }
                                     .controlSize(.small)
                             }
                         }
@@ -230,6 +273,19 @@ struct ContentView: View {
 
     private func outputName(for input: URL) -> String {
         (try? OutputFile.url(for: input).lastPathComponent) ?? "—"
+    }
+
+    private func settingRow<Content: View>(
+        _ title: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        HStack(spacing: 14) {
+            Text(title)
+                .foregroundStyle(.secondary)
+                .frame(width: 160, alignment: .trailing)
+            content()
+            Spacer(minLength: 0)
+        }
     }
 
     private func loadDroppedFiles(_ providers: [NSItemProvider]) -> Bool {

@@ -7,17 +7,22 @@ struct MPCMidiConverterApplication: App {
     @StateObject private var model = ConverterViewModel.shared
 
     var body: some Scene {
-        Window("MPC MIDI Converter", id: "main") {
+        Window("MPC MIDI Converter", id: "converter") {
             ContentView(model: model)
-                .frame(minWidth: 720, minHeight: 620)
+                .frame(minWidth: 780, minHeight: 480)
         }
+        .defaultSize(width: 860, height: 500)
         .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("Apri file MIDI…") {
+                Button("Open MIDI Files…") {
                     model.chooseFiles()
                 }
                 .keyboardShortcut("o")
+
+                Button("Create Profile from XPM…") {
+                    model.chooseXPMProgram()
+                }
             }
         }
     }

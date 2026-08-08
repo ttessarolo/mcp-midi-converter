@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key>
-    <string>it</string>
+	<string>en</string>
     <key>CFBundleDisplayName</key>
     <string>MPC MIDI Converter</string>
     <key>CFBundleDocumentTypes</key>

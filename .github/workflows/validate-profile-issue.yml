@@ -1,0 +1,24 @@
+name: Validate profile issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  validate:
+    if: startsWith(github.event.issue.title, '[Profile]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out validator
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Validate profile JSON and update issue comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/validate-profile-issue.js "$GITHUB_EVENT_PATH"

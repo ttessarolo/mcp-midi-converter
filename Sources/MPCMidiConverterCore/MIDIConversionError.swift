@@ -18,31 +18,31 @@ public enum MIDIConversionError: LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .fileTooShort:
-            "Il file è troppo corto per essere uno Standard MIDI File."
+            "The file is too short to be a Standard MIDI File."
         case .missingHeaderChunk:
-            "Il file non inizia con il chunk MIDI MThd."
+            "The file does not start with an MThd chunk."
         case let .invalidHeaderLength(length):
-            "Il chunk MThd dichiara una lunghezza non valida (\(length))."
+            "The MThd chunk declares an invalid length (\(length))."
         case let .unsupportedFormat(format):
-            "Il formato MIDI \(format) non è supportato; sono validi SMF 0, 1 e 2."
+            "MIDI format \(format) is unsupported; SMF 0, 1, and 2 are accepted."
         case let .truncatedChunkHeader(offset):
-            "Header di chunk troncato all'offset \(offset)."
+            "Truncated chunk header at offset \(offset)."
         case let .truncatedChunk(id, length):
-            "Il chunk \(id) è troncato rispetto alla lunghezza dichiarata \(length)."
+            "Chunk \(id) is shorter than its declared length of \(length)."
         case let .trackCountMismatch(declared, parsed):
-            "Il file dichiara \(declared) tracce MTrk ma ne contiene \(parsed)."
+            "The file declares \(declared) MTrk chunks but contains \(parsed)."
         case let .truncatedVariableLengthQuantity(offset):
-            "Valore MIDI a lunghezza variabile troncato all'offset \(offset)."
+            "Truncated MIDI variable-length quantity at offset \(offset)."
         case let .oversizedVariableLengthQuantity(offset):
-            "Valore MIDI a lunghezza variabile oltre il limite di 4 byte all'offset \(offset)."
+            "MIDI variable-length quantity exceeds four bytes at offset \(offset)."
         case let .missingRunningStatus(offset):
-            "Evento MIDI senza status né running status all'offset \(offset)."
+            "MIDI event has no status or running status at offset \(offset)."
         case let .invalidDataByte(offset, value):
-            "Byte dati MIDI non valido 0x\(String(value, radix: 16)) all'offset \(offset)."
+            "Invalid MIDI data byte 0x\(String(value, radix: 16)) at offset \(offset)."
         case let .truncatedEvent(offset):
-            "Evento MIDI troncato all'offset \(offset)."
+            "Truncated MIDI event at offset \(offset)."
         case let .unsupportedSystemStatus(offset, status):
-            "Status di sistema 0x\(String(status, radix: 16)) non ammesso in SMF all'offset \(offset)."
+            "System status 0x\(String(status, radix: 16)) is not allowed in an SMF at offset \(offset)."
         }
     }
 }

@@ -46,25 +46,25 @@ enum MPCMidiConverterCLI {
                             overwrite: options.overwrite
                         )
                     }
-                    let prefix = options.dryRun ? "ANTEPRIMA" : "CREATO"
+                    let prefix = options.dryRun ? "PREVIEW" : "CREATED"
                     print("\(prefix): \(output.path)")
                     print(
-                        "  tracce=\(result.report.parsedTrackCount) "
-                            + "eventi=\(result.report.eligibleEvents) "
-                            + "modificati=\(result.report.changedEvents) "
+                        "  tracks=\(result.report.parsedTrackCount) "
+                            + "events=\(result.report.eligibleEvents) "
+                            + "changed=\(result.report.changedEvents) "
                             + "fallback=\(result.report.fallbackEvents) "
-                            + "silenziosi=\(result.report.silencedEvents)"
+                            + "silenced=\(result.report.silencedEvents)"
                     )
                 } catch {
                     failed = true
-                    fputs("ERRORE \(input.path): \(error.localizedDescription)\n", stderr)
+                    fputs("ERROR \(input.path): \(error.localizedDescription)\n", stderr)
                 }
             }
             if failed {
                 exit(EXIT_FAILURE)
             }
         } catch {
-            fputs("Errore: \(error.localizedDescription)\n\n\(Options.help)\n", stderr)
+            fputs("Error: \(error.localizedDescription)\n\n\(Options.help)\n", stderr)
             exit(EXIT_FAILURE)
         }
     }
@@ -125,18 +125,18 @@ private struct Options {
     }
 
     static let help = """
-    Uso:
-      mpc-midi-converter [opzioni] file.mid [altro.mid ...]
+    Usage:
+      mpc-midi-converter [options] file.mid [another.mid ...]
 
-    Opzioni:
-      --policy fallback|silence|keep   Gestione strumenti GM non disponibili
-      --channels 10|all               Canale 10 GM (default) o tutti i canali
-      --profile-file profilo.json     Carica un profilo esterno
-      --no-poly-pressure              Non rimappare Polyphonic Key Pressure
-      --overwrite                     Sovrascrive un output -mpc già esistente
-      --dry-run                       Analizza senza scrivere
-      --list-profiles                 Elenca i profili inclusi
-      -h, --help                      Mostra questo aiuto
+    Options:
+      --policy fallback|silence|keep   Handle unavailable GM instruments
+      --channels 10|all               GM channel 10 (default) or all channels
+      --profile-file profile.json     Load an external mapping profile
+      --no-poly-pressure              Do not remap Polyphonic Key Pressure
+      --overwrite                     Replace an existing -mpc output
+      --dry-run                       Analyze without writing
+      --list-profiles                 List bundled profiles
+      -h, --help                      Show this help
     """
 }
 
@@ -150,15 +150,15 @@ private enum CLIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noInputFiles:
-            "Nessun file MIDI indicato."
+            "No MIDI input files were provided."
         case let .missingValue(option):
-            "Manca il valore per \(option)."
+            "Missing value for \(option)."
         case let .invalidPolicy(value):
-            "Policy non valida: \(value)."
+            "Invalid policy: \(value)."
         case let .invalidChannels(value):
-            "Canali non validi: \(value). Usa 10 oppure all."
+            "Invalid channel selection: \(value). Use 10 or all."
         case let .unknownOption(option):
-            "Opzione sconosciuta: \(option)."
+            "Unknown option: \(option)."
         }
     }
 }

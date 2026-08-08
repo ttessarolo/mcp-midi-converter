@@ -36,7 +36,7 @@ public struct TranslationProfile: Identifiable, Hashable, Sendable {
     public static let bfdPop113 = TranslationProfile(
         id: "akai-mpc-bfd-pop-113",
         name: "Akai MPC - BFD Pop Kit 113",
-        description: "Profilo misurato dal Drum Program Acoustic-Kit-BFD Pop Kit 113 salvato da MPC 3.9.1.2.",
+        description: "Measured from the Acoustic-Kit-BFD Pop Kit 113 Drum Program saved by MPC 3.9.1.2.",
         source: "General MIDI Level 1 percussion",
         target: "Akai MPC Acoustic-Kit-BFD Pop Kit 113",
         gmRange: 35...81,
@@ -78,6 +78,13 @@ public struct TranslationProfile: Identifiable, Hashable, Sendable {
         let data = try Data(contentsOf: url)
         let document = try JSONDecoder().decode(ProfileDocument.self, from: data)
         return try document.makeProfile()
+    }
+
+    public func jsonData(prettyPrinted: Bool = true) throws -> Data {
+        try validate()
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = prettyPrinted ? [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes] : [.sortedKeys]
+        return try encoder.encode(ProfileDocument(profile: self))
     }
 
     public func validate() throws {
@@ -133,22 +140,22 @@ public enum UnavailableNotePolicy: String, CaseIterable, Identifiable, Sendable 
     public var title: String {
         switch self {
         case .musicalFallback:
-            "Fallback musicali; altrimenti silenzio"
+            "Musical fallbacks, then silence"
         case .silence:
-            "Solo mapping primari; resto in silenzio"
+            "Primary mappings only; silence the rest"
         case .keepOriginal:
-            "Mantieni le note non disponibili (avanzato)"
+            "Keep unavailable notes (advanced)"
         }
     }
 
     public var explanation: String {
         switch self {
         case .musicalFallback:
-            "Usa sostituzioni sensate per clap, electric snare e piatti; le altre percussioni mancanti vengono inviate a un pad vuoto."
+            "Uses declared substitutes for clap, electric snare, and cymbals; other missing percussion is routed to an empty pad."
         case .silence:
-            "Usa soltanto i mapping primari dichiarati dal profilo; tutti gli altri strumenti vengono inviati a un pad vuoto."
+            "Uses only the profile's primary mappings; every other instrument is routed to an empty pad."
         case .keepOriginal:
-            "Lascia invariato il numero delle note senza equivalente. Sul kit di destinazione potrebbero attivare suoni errati."
+            "Leaves unmatched note numbers unchanged. They may trigger the wrong sounds in the destination kit."
         }
     }
 }
@@ -162,9 +169,9 @@ public enum MIDIChannelSelection: String, CaseIterable, Identifiable, Sendable {
     public var title: String {
         switch self {
         case .generalMIDIPercussion:
-            "Solo canale 10 GM (consigliato)"
+            "GM channel 10 only (recommended)"
         case .allChannels:
-            "Tutti i canali (file contenente solo batteria)"
+            "All channels (drum-only file)"
         }
     }
 
@@ -211,7 +218,7 @@ public enum MappingKind: String, Sendable {
     case outsideGMRange
 }
 
-private struct ProfileDocument: Decodable {
+private struct ProfileDocument: Codable {
     let id: String
     let name: String
     let description: String
@@ -221,6 +228,18 @@ private struct ProfileDocument: Decodable {
     let silentNote: Int
     let direct: [String: Int]
     let fallback: [String: Int]
+
+    init(profile: TranslationProfile) {
+        id = profile.id
+        name = profile.name
+        description = profile.description
+        source = profile.source
+        target = profile.target
+        gmRange = [Int(profile.gmRange.lowerBound), Int(profile.gmRange.upperBound)]
+        silentNote = Int(profile.silentNote)
+        direct = Dictionary(uniqueKeysWithValues: profile.direct.map { (String($0.key), Int($0.value)) })
+        fallback = Dictionary(uniqueKeysWithValues: profile.fallback.map { (String($0.key), Int($0.value)) })
+    }
 
     func makeProfile() throws -> TranslationProfile {
         guard gmRange.count == 2,
@@ -283,13 +302,13 @@ public enum ProfileError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidRangeOrSilentNote:
-            "Il profilo contiene un intervallo GM o una nota silenziosa non validi."
+            "The profile contains an invalid GM range or silent note."
         case .missingIdentity:
-            "Il profilo deve avere id e nome non vuoti."
+            "The profile must have a non-empty ID and name."
         case let .invalidMapping(source, target):
-            "Il profilo contiene una traduzione MIDI non valida: \(source) -> \(target)."
+            "The profile contains an invalid MIDI mapping: \(source) -> \(target)."
         case let .overlappingMappings(notes):
-            "Le note \(notes.map(String.init).joined(separator: ", ")) compaiono sia nelle corrispondenze dirette sia nei fallback."
+            "Notes \(notes.map(String.init).joined(separator: ", ")) appear in both primary mappings and fallbacks."
         }
     }
 }

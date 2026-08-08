@@ -326,6 +326,21 @@ struct StandardMIDIRewriterTests {
             )
         }
     }
+
+    @Test("Exports a profile as canonical JSON that loads without losing mappings")
+    func profileJSONRoundTrip() throws {
+        let data = try TranslationProfile.bfdPop113.jsonData()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("profile-roundtrip-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let file = directory.appendingPathComponent("profile.json")
+        try data.write(to: file)
+
+        let decoded = try TranslationProfile.load(from: file)
+        #expect(decoded == .bfdPop113)
+        #expect(String(decoding: data, as: UTF8.self).contains("\"35\" : 36"))
+    }
 }
 
 private enum RaceOutcome: Sendable {

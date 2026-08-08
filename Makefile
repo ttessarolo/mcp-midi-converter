@@ -1,4 +1,8 @@
-.PHONY: build test smoke app verify clean
+.DEFAULT_GOAL := local
+
+.PHONY: local build test smoke app verify release clean
+
+local: app
 
 build:
 	swift build
@@ -14,6 +18,9 @@ app:
 
 verify:
 	./scripts/verify.sh
+
+release: verify
+	cd dist && shasum -a 256 "MPC-MIDI-Converter-macOS-$$(uname -m).zip" > "MPC-MIDI-Converter-macOS-$$(uname -m).zip.sha256"
 
 clean:
 	swift package clean

@@ -45,9 +45,9 @@ public enum OutputFileError: LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case let .unsupportedExtension(fileExtension):
-            "Estensione non supportata: .\(fileExtension). Usa un file .mid o .midi."
+            "Unsupported extension: .\(fileExtension). Use a .mid or .midi file."
         case let .outputAlreadyExists(url):
-            "Esiste già \(url.lastPathComponent). Abilita la sovrascrittura oppure spostalo."
+            "\(url.lastPathComponent) already exists. Enable overwrite or move the existing file."
         }
     }
 }

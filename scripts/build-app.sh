@@ -48,7 +48,7 @@ plutil -lint "$contents/Info.plist" >/dev/null
 codesign --force --sign - "$bundle" >/dev/null
 codesign --verify --deep --strict "$bundle"
 
-archive="$repo_root/dist/$app_name.zip"
+archive="$repo_root/dist/MPC-MIDI-Converter-macOS-$(uname -m).zip"
 rm -f "$archive"
 ditto -c -k --norsrc --noextattr --noqtn --noacl --keepParent "$bundle" "$archive"
 

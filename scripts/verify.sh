@@ -5,12 +5,13 @@ repo_root="${0:A:h:h}"
 cd "$repo_root"
 
 swift test
+node "$repo_root/scripts/validate-profile-issue.test.js"
 swift build -c release --product mpc-midi-converter
 "$repo_root/scripts/smoke-test.sh"
 "$repo_root/scripts/build-app.sh"
 
 app="$repo_root/dist/MPC MIDI Converter.app"
-archive="$repo_root/dist/MPC MIDI Converter.zip"
+archive="$repo_root/dist/MPC-MIDI-Converter-macOS-$(uname -m).zip"
 plutil -lint "$app/Contents/Info.plist"
 codesign --verify --deep --strict --verbose=2 "$app"
 test -x "$app/Contents/MacOS/MPCMidiConverterApp"
