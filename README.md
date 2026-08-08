@@ -38,14 +38,15 @@ shasum -a 256 -c MPC-MIDI-Converter-macOS-arm64.zip.sha256
 
 ## What problem it solves
 
-General MIDI drum files normally use channel 10 and the GM percussion notes
-35–81. MPC Drum Programs can assign their pads to different MIDI notes. When
-the layouts do not match, a kick can trigger a snare, a hi-hat can trigger a
-tom, and so on.
+A Standard MIDI File can contain a complete song. Under General MIDI, its
+percussion part normally uses channel 10 and notes 35–81. MPC Drum Programs can
+assign their pads to different MIDI notes. When the layouts do not match, a
+kick can trigger a snare, a hi-hat can trigger a tom, and so on.
 
-MPC MIDI Converter changes the note numbers in a copy of the MIDI file so that
-they match the selected Drum Program. It does not edit the kit to impose a
-global layout: each distinct pad layout has its own reusable profile.
+MPC MIDI Converter changes only the drum-part note numbers in an output copy so
+that they match the selected Drum Program. All other musical parts remain
+unchanged. It does not edit the kit to impose a global layout: each distinct
+pad layout has its own reusable profile.
 
 Conversion never starts merely because files are dropped. The app shows the
 choices first and waits for **Convert**. Existing outputs are refused unless
