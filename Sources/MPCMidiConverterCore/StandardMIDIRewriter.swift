@@ -34,6 +34,12 @@ public enum StandardMIDIRewriter {
         var cursor = headerEnd
 
         while cursor < bytes.count {
+            if parsedTrackCount == Int(declaredTrackCount),
+               bytes[cursor...].allSatisfy(isSafeTrailingPadding)
+            {
+                cursor = bytes.count
+                break
+            }
             guard cursor + 8 <= bytes.count else {
                 throw MIDIConversionError.truncatedChunkHeader(offset: cursor)
             }
@@ -212,5 +218,14 @@ public enum StandardMIDIRewriter {
             | (UInt32(bytes[offset + 1]) << 16)
             | (UInt32(bytes[offset + 2]) << 8)
             | UInt32(bytes[offset + 3])
+    }
+
+    private static func isSafeTrailingPadding(_ byte: UInt8) -> Bool {
+        switch byte {
+        case 0x09, 0x0A, 0x0D, 0x20:
+            true
+        default:
+            false
+        }
     }
 }

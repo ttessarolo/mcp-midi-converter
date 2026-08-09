@@ -16,6 +16,9 @@ Research last checked: 2026-08-08.
 The converter does not decode and reserialize a song. After validating event
 boundaries, it replaces only the key byte in place. This preserves file size,
 chunk lengths, timing, running status, and every unrelated byte.
+After every track declared by the MIDI header has been parsed, trailing ASCII
+tabs, spaces, and line endings are tolerated and preserved byte for byte. Any
+other incomplete or unknown trailing data still fails closed.
 
 ## macOS integration
 

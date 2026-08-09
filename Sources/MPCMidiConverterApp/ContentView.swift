@@ -150,7 +150,7 @@ struct ContentView: View {
                             }
                         }
                         .labelsHidden()
-                        .frame(width: 220)
+                        .frame(width: 220, alignment: .leading)
                         Button("Import…") { model.importProfile() }
                             .help("Import a JSON mapping profile for another kit")
                         Button {
@@ -175,7 +175,7 @@ struct ContentView: View {
                         }
                     }
                     .labelsHidden()
-                    .frame(width: 300)
+                    .frame(width: 300, alignment: .leading)
                 }
 
                 settingRow("Channels to Convert") {
@@ -185,7 +185,7 @@ struct ContentView: View {
                         }
                     }
                     .labelsHidden()
-                    .frame(width: 300)
+                    .frame(width: 300, alignment: .leading)
                 }
 
                 Text(model.unavailablePolicy.explanation)

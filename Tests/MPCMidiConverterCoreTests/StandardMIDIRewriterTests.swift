@@ -133,6 +133,36 @@ struct StandardMIDIRewriterTests {
         #expect([UInt8](result.data).containsSubsequence(Array("XFIH".utf8) + [0, 0, 0, 5, 1, 2, 3, 4, 5]))
     }
 
+    @Test("Preserves safe trailing whitespace and rejects unknown trailing bytes")
+    func trailingPadding() throws {
+        let base = midiFile(tracks: [trackChunk([
+            0x00, 0x99, 38, 100,
+            0x00, 0xFF, 0x2F, 0x00
+        ])])
+        var padded = base
+        let padding = Data([0x0A, 0x0A, 0x0D, 0x20, 0x09])
+        padded.append(padding)
+
+        let result = try StandardMIDIRewriter.rewrite(
+            padded,
+            configuration: fallbackConfiguration
+        )
+
+        #expect(result.data.count == padded.count)
+        #expect(result.data.suffix(padding.count) == padding)
+        #expect(result.report.parsedTrackCount == 1)
+        #expect(noteKeys(in: result.data) == [37])
+
+        var invalidTail = base
+        invalidTail.append(contentsOf: [0x0A, 0x01])
+        #expect(throws: MIDIConversionError.self) {
+            try StandardMIDIRewriter.rewrite(
+                invalidTail,
+                configuration: fallbackConfiguration
+            )
+        }
+    }
+
     @Test("Rejects running status after a meta event")
     func runningStatusInterruptedByMetaEvent() {
         let input = midiFile(tracks: [trackChunk([
